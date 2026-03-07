@@ -1,37 +1,56 @@
 # AI Document Search System (RAG)
 
-This project implements a Retrieval-Augmented Generation (RAG) system that allows users to ask questions about documents.
+## Demo
+
+![AI Document Chat Demo](assets/rag-demo.png)
+
+This project implements a Retrieval-Augmented Generation (RAG) system that allows users to upload documents and ask questions about them.
 
 The system retrieves relevant document sections using embeddings and a vector database, then generates answers using a local language model.
 
+---
+
 ## Features
 
-- Document ingestion from files
+- Upload PDF documents
+- Document text extraction
 - Text chunking for better retrieval
 - Local embeddings using Ollama
 - Vector database using ChromaDB
 - Semantic search
 - AI-generated answers using a local LLM
+- Interactive Streamlit web interface
+
+---
 
 ## Tech Stack
 
 - Python
+- Streamlit
 - Ollama
 - ChromaDB
+- PyPDF
 - Local LLM (Gemma)
 - Embedding model (nomic-embed-text)
 
+---
+
 ## How It Works
 
-1. Documents are loaded from the `data/docs` folder
-2. Documents are split into chunks
-3. Each chunk is converted into embeddings
-4. Embeddings are stored in a vector database
-5. User questions are converted into embeddings
-6. The most relevant document chunk is retrieved
-7. The language model generates a final answer using the retrieved context
+1. Upload a PDF document
+2. Extract text from the document
+3. Split the text into chunks
+4. Convert chunks into embeddings
+5. Store embeddings in ChromaDB
+6. Convert user question into embedding
+7. Retrieve the most relevant chunks
+8. Generate the final answer with the LLM
 
-## Run the Project
+---
+
+## Run the Application
+
+Install dependencies:
 
 ```bash
-python app.py
+pip install -r requirements.txt
