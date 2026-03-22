@@ -11,13 +11,12 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Generator
 
+import os
+
 import ollama
 from pypdf import PdfReader
 
-from config import (
-    CHUNK_SIZE, CHUNK_OVERLAP, EMBED_MODEL, LLM_MODEL,
-    GROQ_API_KEY, GROQ_MODEL, COHERE_API_KEY
-)
+from config import CHUNK_SIZE, CHUNK_OVERLAP, EMBED_MODEL, LLM_MODEL, GROQ_MODEL
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +74,10 @@ def split_into_chunks(text: str) -> list:
 
 def embed_text(text: str, input_type: str = "search_query") -> list:
     """Embed a single text string. input_type: 'search_query' or 'search_document'."""
-    if COHERE_API_KEY:
+    cohere_key = os.environ.get("COHERE_API_KEY", "")
+    if cohere_key:
         import cohere
-        co = cohere.ClientV2(api_key=COHERE_API_KEY)
+        co = cohere.ClientV2(api_key=cohere_key)
         resp = co.embed(
             texts=[text],
             model="embed-english-v3.0",
@@ -93,9 +93,10 @@ def embed_chunks_concurrent(chunks: list, max_workers: int = 4, progress_callbac
     logger.info("Embedding %d chunks", len(chunks))
     t0 = time.time()
 
-    if COHERE_API_KEY:
+    cohere_key = os.environ.get("COHERE_API_KEY", "")
+    if cohere_key:
         import cohere
-        co = cohere.ClientV2(api_key=COHERE_API_KEY)
+        co = cohere.ClientV2(api_key=cohere_key)
         resp = co.embed(
             texts=chunks,
             model="embed-english-v3.0",
@@ -163,10 +164,11 @@ def stream_answer(messages: list) -> Generator[str, None, None]:
     """Generator that streams tokens from the LLM (Groq or Ollama)."""
     t0 = time.time()
 
-    if GROQ_API_KEY:
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    if groq_key:
         from groq import Groq
         logger.info("Streaming from Groq (%s)", GROQ_MODEL)
-        client = Groq(api_key=GROQ_API_KEY)
+        client = Groq(api_key=groq_key)
         stream = client.chat.completions.create(
             model=GROQ_MODEL, messages=messages, stream=True
         )
@@ -189,10 +191,11 @@ def generate_answer(prompt: str) -> str:
     """Non-streaming answer (used by CLI path)."""
     t0 = time.time()
 
-    if GROQ_API_KEY:
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    if groq_key:
         from groq import Groq
         logger.info("Generating answer via Groq (%s)", GROQ_MODEL)
-        client = Groq(api_key=GROQ_API_KEY)
+        client = Groq(api_key=groq_key)
         response = client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[{"role": "user", "content": prompt}]

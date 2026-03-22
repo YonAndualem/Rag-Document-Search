@@ -109,8 +109,10 @@ def delete_source(collection, source: str):
 
 def check_backends():
     """Returns True if backends are ready, a str error message otherwise."""
-    using_cloud = GROQ_API_KEY and COHERE_API_KEY
-    if using_cloud:
+    # Read env vars fresh at call time (not from cached imports)
+    groq_key = os.environ.get("GROQ_API_KEY", "")
+    cohere_key = os.environ.get("COHERE_API_KEY", "")
+    if groq_key and cohere_key:
         return True  # validated at query time; avoid slow startup checks
 
     # Ollama mode
