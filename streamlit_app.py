@@ -10,7 +10,8 @@ import streamlit as st
 
 from config import (
     CHROMA_PATH, COLLECTION_NAME, EMBED_MODEL, LLM_MODEL,
-    MAX_QUERY_LENGTH, MAX_FILE_SIZE_MB, OLLAMA_BASE_URL
+    MAX_QUERY_LENGTH, MAX_FILE_SIZE_MB, OLLAMA_BASE_URL,
+    APP_PASSWORD, RATE_LIMIT_PER_MINUTE
 )
 from logger import setup_logging
 from rag_core import (
@@ -139,9 +140,27 @@ def get_page_count(uploaded_file, temp_path: str) -> int:
 # ── Session state init ────────────────────────────────────────────────────────
 
 if "messages" not in st.session_state:
-    st.session_state.messages = []          # [{role, content, context, scores, sources}]
+    st.session_state.messages = []
 if "embedding_cache" not in st.session_state:
-    st.session_state.embedding_cache = {}   # query → embedding
+    st.session_state.embedding_cache = {}
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = not APP_PASSWORD
+if "request_times" not in st.session_state:
+    st.session_state.request_times = []
+
+# ── Auth gate ─────────────────────────────────────────────────────────────────
+
+if not st.session_state.authenticated:
+    st.markdown('<div class="main-title">AI Document Chat</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-subtitle">Enter the password to continue.</div>', unsafe_allow_html=True)
+    pwd = st.text_input("Password", type="password")
+    if st.button("Sign in", type="primary"):
+        if pwd == APP_PASSWORD:
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            st.error("Incorrect password.")
+    st.stop()
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
@@ -320,6 +339,16 @@ for msg in st.session_state.messages:
 query = st.chat_input(f"Ask a question about your documents… (max {MAX_QUERY_LENGTH} chars)")
 
 if query:
+    import time as _time
+    now = _time.time()
+    st.session_state.request_times = [t for t in st.session_state.request_times if now - t < 60]
+
+    if len(st.session_state.request_times) >= RATE_LIMIT_PER_MINUTE:
+        st.error(f"Rate limit reached ({RATE_LIMIT_PER_MINUTE} requests/min). Please wait a moment.")
+        st.stop()
+
+    st.session_state.request_times.append(now)
+
     query = query.strip()
 
     if len(query) > MAX_QUERY_LENGTH:

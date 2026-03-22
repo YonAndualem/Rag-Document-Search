@@ -1,7 +1,8 @@
 import logging
+import sys
 
 from config import MAX_QUERY_LENGTH
-from rag_core import embed_text, build_prompt, generate_answer
+from rag_core import embed_text, build_messages, stream_answer
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,8 @@ def sanitize_query(query: str):
 
 
 def ask_rag(collection):
+    history = []   # [{role, content}] conversation memory
+
     while True:
         raw_query = input("Ask a question (or type 'exit'): ")
 
@@ -31,7 +34,6 @@ def ask_rag(collection):
         logger.info("Query received: %s", query)
 
         query_embedding = embed_text(query)
-
         results = collection.query(query_embeddings=[query_embedding], n_results=3)
 
         docs = results.get("documents", [[]])
@@ -43,10 +45,18 @@ def ask_rag(collection):
         context = "\n\n".join(docs[0])
         print("\nBest Matching Context:\n")
         print(context[:600])
+        print()
 
-        prompt = build_prompt(context, query)
-        answer = generate_answer(prompt)
+        messages = build_messages(context, query, history)
 
-        print("\nFinal Answer:\n")
-        print(answer)
+        print("Answer:\n")
+        answer_parts = []
+        for token in stream_answer(messages):
+            sys.stdout.write(token)
+            sys.stdout.flush()
+            answer_parts.append(token)
         print("\n" + "-" * 50 + "\n")
+
+        full_answer = "".join(answer_parts)
+        history.append({"role": "user", "content": query})
+        history.append({"role": "assistant", "content": full_answer})
