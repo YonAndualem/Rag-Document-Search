@@ -14,3 +14,4 @@ MAX_QUERY_LENGTH = int(os.getenv("MAX_QUERY_LENGTH", 500))
 MAX_FILE_SIZE_MB = int(os.getenv("MAX_FILE_SIZE_MB", 50))
 APP_PASSWORD = os.getenv("APP_PASSWORD", "")          # empty = no auth
 RATE_LIMIT_PER_MINUTE = int(os.getenv("RATE_LIMIT_PER_MINUTE", 20))
+MAX_HISTORY_TURNS = int(os.getenv("MAX_HISTORY_TURNS", 10))  # user+assistant pairs

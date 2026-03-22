@@ -1,0 +1,17 @@
+[server]
+port = 8501
+headless = true
+enableCORS = false
+enableXsrfProtection = true
+maxUploadSize = 50        # MB — matches MAX_FILE_SIZE_MB in .env
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#2563eb"
+backgroundColor = "#f8fafc"
+secondaryBackgroundColor = "#eef2ff"
+textColor = "#111827"
+font = "sans serif"

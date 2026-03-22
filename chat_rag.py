@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from config import MAX_QUERY_LENGTH
+from config import MAX_QUERY_LENGTH, MAX_HISTORY_TURNS
 from rag_core import embed_text, build_messages, stream_answer
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,9 @@ def ask_rag(collection):
         print(context[:600])
         print()
 
-        messages = build_messages(context, query, history)
+        max_msgs = MAX_HISTORY_TURNS * 2
+        trimmed = history[-max_msgs:] if len(history) > max_msgs else history
+        messages = build_messages(context, query, trimmed)
 
         print("Answer:\n")
         answer_parts = []

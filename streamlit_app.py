@@ -11,7 +11,7 @@ import streamlit as st
 from config import (
     CHROMA_PATH, COLLECTION_NAME, EMBED_MODEL, LLM_MODEL,
     MAX_QUERY_LENGTH, MAX_FILE_SIZE_MB, OLLAMA_BASE_URL,
-    APP_PASSWORD, RATE_LIMIT_PER_MINUTE
+    APP_PASSWORD, RATE_LIMIT_PER_MINUTE, MAX_HISTORY_TURNS
 )
 from logger import setup_logging
 from rag_core import (
@@ -394,12 +394,15 @@ if query:
         context_scores = distances[0] if distances else []
         context = "\n\n".join(context_chunks)
 
-        # Build conversation history (exclude current query, already appended)
-        history = [
+        # Build conversation history — cap at MAX_HISTORY_TURNS pairs to avoid
+        # exceeding the model's context window on long conversations
+        prior = [
             {"role": m["role"], "content": m["content"]}
             for m in st.session_state.messages[:-1]
             if m["role"] in ("user", "assistant")
         ]
+        max_msgs = MAX_HISTORY_TURNS * 2  # each turn = 1 user + 1 assistant msg
+        history = prior[-max_msgs:] if len(prior) > max_msgs else prior
         messages = build_messages(context, query, history)
 
         # Stream answer
