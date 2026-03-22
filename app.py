@@ -1,3 +1,4 @@
+import os
 import sys
 
 import requests
@@ -28,6 +29,16 @@ def check_ollama():
 
 
 check_ollama()
+
+if not os.path.isdir(folder):
+    os.makedirs(folder)
+    print(f"Created '{folder}'. Add .pdf, .docx, or .txt files there and re-run.")
+    sys.exit(0)
+
 documents = load_documents(folder)
+if not documents:
+    print(f"No supported documents found in '{folder}'. Add .pdf, .docx, or .txt files and re-run.")
+    sys.exit(0)
+
 collection = store_embeddings(documents)
 ask_rag(collection)

@@ -125,7 +125,6 @@ def extract_text(uploaded_file, temp_path: str) -> str:
     if uploaded_file.name.lower().endswith(".pdf"):
         return extract_text_from_pdf(temp_path)
     if uploaded_file.name.lower().endswith(".docx") and DOCX_SUPPORTED:
-        from docx import Document as DocxDocument
         doc = DocxDocument(temp_path)
         return " ".join(p.text for p in doc.paragraphs if p.text.strip())
     raise ValueError(f"Unsupported file type: {uploaded_file.name}")

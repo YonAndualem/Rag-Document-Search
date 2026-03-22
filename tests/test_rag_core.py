@@ -1,7 +1,7 @@
 """Unit tests for rag_core utilities (no Ollama or ChromaDB required)."""
 import sys
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 

@@ -5,6 +5,7 @@ import logging
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Generator
 
 import ollama
 from pypdf import PdfReader
@@ -119,7 +120,7 @@ def build_prompt(context: str, query: str) -> str:
     )
 
 
-def stream_answer(messages: list):
+def stream_answer(messages: list) -> Generator[str, None, None]:
     """Generator that streams tokens from the LLM."""
     logger.info("Streaming response from LLM (%s)", LLM_MODEL)
     t0 = time.time()
