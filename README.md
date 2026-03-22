@@ -2,6 +2,8 @@
 
 A Retrieval-Augmented Generation system for uploading documents and having a streamed, multi-turn conversation about their contents. Runs fully offline with Ollama or in the cloud with Groq + Cohere — deploy free to [Render](https://render.com).
 
+**Live demo:** https://rag-document-search-qe6o.onrender.com
+
 ![AI Document Chat Demo](assets/rag-demo.png)
 
 ---
